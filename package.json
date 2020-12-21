@@ -15,7 +15,8 @@
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",
     "graphql": "^15.4.0",
-    "js-logger": "^1.6.1"
+    "js-logger": "^1.6.1",
+    "mongoose": "^5.11.8"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",
