@@ -10,6 +10,8 @@ const { graphqlHTTP } = require('express-graphql');
 const graphQlSchema = require('./graphql/schema');
 const graphQlResolvers = require('./graphql/resolvers');
 
+const isAuth = require('./middleware/isAuth');
+
 const app = express();
 const port = Number(process.env.PORT);
 
@@ -20,6 +22,8 @@ Logger.setLevel(process.env.NODE_ENV === 'production' ? Logger.ERROR : Logger.DE
 
 app.use(express.json());
 app.use(cors());
+
+app.use(isAuth);
 
 app.use(
   '/graphql',
