@@ -1,0 +1,29 @@
+@import './variables.scss';
+@import './utilities.scss';
+
+*,
+*::after,
+*::before {
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 62.5%; //10px
+  font-family: $font-family-default;
+  scroll-behavior: smooth;
+  box-sizing: border-box;
+
+  @media (max-width: 1200px) {
+    font-size: 56.25%; //9px
+  }
+
+  @media (max-width: 900px) {
+    font-size: 50%; //8px
+  }
+
+  @media (max-width: 600px) {
+    font-size: 43.75%; //7px
+  }
+}
