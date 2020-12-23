@@ -27,3 +27,11 @@ html {
     font-size: 43.75%; //7px
   }
 }
+
+.page {
+  margin-top: 9rem;
+
+  @media (max-width: 400px) {
+    margin-top: 12rem;
+  }
+}
