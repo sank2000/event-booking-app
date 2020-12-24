@@ -1,0 +1,63 @@
+@import '../../styles/variables.scss';
+
+.auth_form {
+  width: 40rem;
+  max-width: 80%;
+  margin: 5rem auto;
+  padding: 2rem 3rem;
+  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.6);
+}
+
+.form_top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  h3 {
+    color: #fff;
+    font-size: 2.5rem;
+    text-align: center;
+    margin: 1rem 0;
+    margin-left: 0.5rem;
+  }
+}
+
+.form_control {
+  margin-bottom: 1rem;
+
+  & input,
+  & label {
+    width: 100%;
+    display: block;
+    font-size: 2rem;
+  }
+
+  & label {
+    margin-bottom: 0.5rem;
+    color: #fff;
+  }
+
+  & input {
+    padding: 0.5rem 1rem;
+    outline: none;
+  }
+}
+
+.form_action {
+  & button {
+    background: $color-primary-main;
+    font: inherit;
+    font-size: 1.5rem;
+    border: 1px solid $color-primary-main;
+    border-radius: 3px;
+    padding: 0.25rem 1rem;
+    margin-right: 1rem;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.26);
+    color: white;
+    cursor: pointer;
+    margin-top: 1rem;
+    outline: none;
+  }
+}
