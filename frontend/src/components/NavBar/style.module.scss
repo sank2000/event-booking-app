@@ -38,9 +38,14 @@
           text-decoration: none;
           font-size: 2rem;
           color: #fff;
+          padding: 0.25rem 0.5rem;
+          transition: all 0.3s;
+
           &:hover,
           &:active {
-            color: #f8e264;
+            background: #ffffff;
+            color: $color-primary-main;
+            border-radius: 5px;
           }
         }
       }

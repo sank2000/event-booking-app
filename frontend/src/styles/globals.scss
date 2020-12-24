@@ -35,3 +35,11 @@ html {
     margin-top: 12rem;
   }
 }
+
+a {
+  &.active {
+    background: #ffffff;
+    color: $color-primary-main !important;
+    border-radius: 5px;
+  }
+}

@@ -1,0 +1,63 @@
+@import '../../styles/variables.scss';
+
+.modal__container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba($color-black, 0.4);
+  transition: all 0.3s;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  width: 70%;
+  height: 80%;
+  background-color: $color-white;
+  border-radius: 1rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1rem 1.2rem rgba($color-black, 0.6);
+
+  &__header {
+    width: 100%;
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .close_btn {
+    color: $color-primary-dark;
+    font-size: 3rem;
+    height: 4rem;
+    width: 4rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s;
+
+    & > span {
+      display: block;
+    }
+
+    &:hover {
+      background-color: $color-primary-dark;
+      color: $color-white;
+    }
+  }
+
+  &__inner {
+    overflow-x: hidden;
+    margin: 0 0.2rem;
+    overflow-y: auto;
+    height: -webkit-fill-available;
+  }
+}
