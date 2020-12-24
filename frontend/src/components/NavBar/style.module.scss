@@ -29,17 +29,22 @@
   &__items {
     ul {
       display: flex;
+      align-items: center;
       list-style: none;
       padding: 0;
       margin: 0;
       li {
         margin: 0 1rem;
-        a {
+        a,
+        button {
           text-decoration: none;
           font-size: 2rem;
           color: #fff;
           padding: 0.25rem 0.5rem;
           transition: all 0.3s;
+          border: none;
+          cursor: pointer;
+          vertical-align: middle;
 
           &:hover,
           &:active {
@@ -47,6 +52,11 @@
             color: $color-primary-main;
             border-radius: 5px;
           }
+        }
+
+        button {
+          background-color: transparent;
+          outline: none;
         }
       }
     }

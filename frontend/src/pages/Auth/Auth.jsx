@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import classes from './style.module.scss';
+
+import AuthContext from '../../context/Auth';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
+
+  const { login } = useContext(AuthContext);
 
   const [value, setValue] = useState({
     email: '',
@@ -70,7 +74,9 @@ export default function Auth() {
         return res.json();
       })
       .then(resData => {
-        console.log(resData);
+        if (resData.data.login.token) {
+          login(resData.data.login.token, resData.data.login.userId, resData.data.login.tokenExpiration);
+        }
       })
       .catch(err => {
         console.log(err);

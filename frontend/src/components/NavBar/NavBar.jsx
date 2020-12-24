@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
 
 import classes from './style.module.scss';
 
+import AuthContext from '../../context/Auth';
+
 export default function NavBar() {
+  const { token, logout } = useContext(AuthContext);
+
   return (
     <header className={classes.nav}>
       <div className={classes.nav_logo}>
@@ -11,15 +15,24 @@ export default function NavBar() {
       </div>
       <nav className={classes.nav__items}>
         <ul>
-          <li>
-            <NavLink to='/auth'>Authenticate</NavLink>
-          </li>
+          {!token && (
+            <li>
+              <NavLink to='/auth'>Login</NavLink>
+            </li>
+          )}
           <li>
             <NavLink to='/events'>Events</NavLink>
           </li>
-          <li>
-            <NavLink to='/bookings'>Bookings</NavLink>
-          </li>
+          {token && (
+            <>
+              <li>
+                <NavLink to='/bookings'>Bookings</NavLink>
+              </li>
+              <li>
+                <button onClick={logout}>Logout</button>
+              </li>
+            </>
+          )}
         </ul>
       </nav>
     </header>
