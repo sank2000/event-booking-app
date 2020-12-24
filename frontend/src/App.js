@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Route, Redirect, Switch } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 
 import './styles/globals.scss';
 
@@ -34,6 +35,15 @@ function App() {
           }}
         >
           <NavBar />
+          <Toaster
+            position='bottom-center'
+            reverseOrder={false}
+            toastOptions={{
+              style: {
+                fontSize: '2rem'
+              }
+            }}
+          />
           <main className='main-content'>
             <Switch>
               {auth.token && <Redirect from='/' to='/events' exact />}

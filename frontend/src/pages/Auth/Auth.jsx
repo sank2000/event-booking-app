@@ -1,10 +1,13 @@
 import React, { useState, useContext } from 'react';
 import classes from './style.module.scss';
+import toast from 'react-hot-toast';
 
 import AuthContext from '../../context/Auth';
+import { Loader } from '../../components';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
+  const [load, setLoad] = useState(false);
 
   const { login } = useContext(AuthContext);
 
@@ -35,6 +38,8 @@ export default function Auth() {
       return;
     }
 
+    setLoad(true);
+
     let requestBody = {
       query: `
         query {
@@ -60,7 +65,7 @@ export default function Auth() {
       };
     }
 
-    fetch('http://localhost:8000/graphql', {
+    fetch('/graphql', {
       method: 'POST',
       body: JSON.stringify(requestBody),
       headers: {
@@ -69,11 +74,14 @@ export default function Auth() {
     })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
+          toast.error('This is an error!');
+          setLoad(false);
           throw new Error('Failed!');
         }
         return res.json();
       })
       .then(resData => {
+        setLoad(false);
         if (resData.data.login.token) {
           login(resData.data.login.token, resData.data.login.userId, resData.data.login.tokenExpiration);
         }
@@ -92,14 +100,21 @@ export default function Auth() {
         </div>
         <div className={classes.form_control}>
           <label htmlFor='email'>E-Mail</label>
-          <input type='email' id='email' name='email' value={value.email} onChange={handleChange} />
+          <input type='email' id='email' name='email' value={value.email} required onChange={handleChange} />
         </div>
         <div className={classes.form_control}>
           <label htmlFor='password'>Password</label>
-          <input type='password' id='password' name='password' value={value.password} onChange={handleChange} />
+          <input
+            type='password'
+            id='password'
+            name='password'
+            value={value.password}
+            required
+            onChange={handleChange}
+          />
         </div>
         <div className={classes.form_action}>
-          <button type='submit'>Submit</button>
+          <button type='submit'>Submit {load && <Loader />}</button>
           <button type='button' onClick={switchModeHandler}>
             Switch to {isLogin ? 'Signup' : 'Login'}
           </button>

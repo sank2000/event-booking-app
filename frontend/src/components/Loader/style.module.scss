@@ -1,0 +1,19 @@
+.loader {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 100%;
+  display: inline-block;
+  background-color: #fff;
+  animation: blink 1s linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0.05;
+  }
+  100% {
+    opacity: 1;
+  }
+}
