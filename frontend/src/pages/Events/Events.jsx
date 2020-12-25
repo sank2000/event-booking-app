@@ -2,13 +2,14 @@ import React, { useState, useContext, useEffect } from 'react';
 
 import classes from './style.module.scss';
 
-import { Modal, Loader } from '../../components';
+import { Modal, Loader, Spinner } from '../../components';
 import AuthContext from '../../context/Auth';
 import toast from 'react-hot-toast';
 
 export default function Events() {
   const [open, setOpen] = useState(false);
   const [load, setLoad] = useState(false);
+  const [pageLoad, setPageLoad] = useState(true);
   const [events, setEvent] = useState([]);
 
   const { token } = useContext(AuthContext);
@@ -69,6 +70,7 @@ export default function Events() {
       .then(resData => {
         const events = resData.data.events;
         setEvent(events);
+        setPageLoad(false);
       })
       .catch(err => {
         console.log(err);
@@ -143,21 +145,27 @@ export default function Events() {
         </div>
       )}
       <div>
-        {events.map((val, ind) => {
-          return (
-            <p
-              key={ind}
-              style={{
-                fontSize: '2rem',
-                padding: '2rem',
-                margin: '1rem',
-                border: '3px solid #000'
-              }}
-            >
-              {val.title}
-            </p>
-          );
-        })}
+        {pageLoad ? (
+          <Spinner style={{ height: '50rem' }} />
+        ) : (
+          <>
+            {events.map((val, ind) => {
+              return (
+                <p
+                  key={ind}
+                  style={{
+                    fontSize: '2rem',
+                    padding: '2rem',
+                    margin: '1rem',
+                    border: '3px solid #000'
+                  }}
+                >
+                  {val.title}
+                </p>
+              );
+            })}
+          </>
+        )}
       </div>
       <Modal
         setIsOpen={setOpen}
