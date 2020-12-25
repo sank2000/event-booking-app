@@ -1,0 +1,73 @@
+@import '../../styles/variables.scss';
+
+.events_control {
+  text-align: center;
+  border: 3px solid $color-primary-main;
+  padding: 1rem;
+  margin: 2rem auto;
+  margin-top: 3rem;
+  width: 40rem;
+  max-width: 80%;
+
+  p {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+}
+
+.btn {
+  background-color: $color-primary-main;
+  font-family: inherit;
+  font-size: 1.5rem;
+  border: none;
+  color: #fff;
+  padding: 1rem 1.5rem;
+  transition: all 0.5s;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba($color-primary-main, 0.8);
+  }
+}
+
+.form_control {
+  margin-bottom: 1rem;
+
+  & input,
+  & textarea,
+  & label {
+    width: 100%;
+    display: block;
+    font-size: 2rem;
+  }
+
+  & label {
+    margin-bottom: 0.5rem;
+    color: #000;
+  }
+
+  & input,
+  & textarea {
+    padding: 0.5rem 1rem;
+    outline: none;
+  }
+}
+
+.form_action {
+  text-align: right;
+
+  & button {
+    background: $color-primary-main;
+    font: inherit;
+    font-size: 2rem;
+    border: 1px solid $color-primary-main;
+    border-radius: 3px;
+    padding: 0.5rem 1rem;
+    margin-right: 1rem;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.26);
+    color: white;
+    cursor: pointer;
+    margin-top: 1rem;
+    outline: none;
+  }
+}
