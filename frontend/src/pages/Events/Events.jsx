@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 export default function Events() {
   const [open, setOpen] = useState(false);
   const [load, setLoad] = useState(false);
+  const [bookingLoad, setBookingLoad] = useState(false);
   const [pageLoad, setPageLoad] = useState(true);
   const [events, setEvent] = useState([]);
   const [openDetails, setOpenDetails] = useState(false);
@@ -143,6 +144,48 @@ export default function Events() {
       });
   };
 
+  const bookEventHandler = () => {
+    if (!token) {
+      setOpenDetails(false);
+      return;
+    }
+    setBookingLoad(true);
+    const requestBody = {
+      query: `
+          mutation {
+            bookEvent(eventId: "${selectedEvent._id}") {
+              _id
+             createdAt
+             updatedAt
+            }
+          }
+        `
+    };
+
+    fetch('/graphql', {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token
+      }
+    })
+      .then(res => {
+        if (res.status !== 200 && res.status !== 201) {
+          toast.error('This is an error!');
+          throw new Error('Failed!');
+        }
+        return res.json();
+      })
+      .then(resData => {
+        toast.success('Booked Successfully !!!');
+        setOpenDetails(false);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
   const setViewDetail = eventId => {
     const selected = events.find(e => e._id === eventId);
     setSelectedEvent({
@@ -215,6 +258,7 @@ export default function Events() {
           CloseIcon
           title={'Details'}
           style={{ height: 'auto', width: 'auto' }}
+          disableClose={load || bookingLoad}
         >
           <h1 style={{ fontSize: '3rem' }}>{selectedEvent.title}</h1>
           <h2 style={{ fontSize: '2rem' }}>
@@ -225,7 +269,11 @@ export default function Events() {
             <button type='button' onClick={() => setOpenDetails(false)}>
               Cancel
             </button>
-            <button type='button'>Book {load && <Loader />}</button>
+            {token && (
+              <button type='button' onClick={() => bookEventHandler()}>
+                Book {bookingLoad && <Loader />}
+              </button>
+            )}
           </div>
         </Modal>
       )}
