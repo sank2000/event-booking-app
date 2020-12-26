@@ -82,8 +82,11 @@ export default function Auth() {
       })
       .then(resData => {
         setLoad(false);
-        if (resData.data.login.token) {
+        if (resData.data.login && resData.data.login.token) {
           login(resData.data.login.token, resData.data.login.userId, resData.data.login.tokenExpiration);
+        } else {
+          toast.success('Account Created Successfully');
+          setIsLogin(true);
         }
       })
       .catch(err => {
