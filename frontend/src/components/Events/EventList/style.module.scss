@@ -1,0 +1,9 @@
+@import '../../../styles/variables.scss';
+
+.event__list {
+  width: 60rem;
+  max-width: 90%;
+  margin: 2rem auto;
+  list-style: none;
+  padding: 0;
+}

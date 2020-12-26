@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 
 import classes from './style.module.scss';
 
-import { Modal, Loader, Spinner } from '../../components';
+import { Modal, Loader, Spinner, EventList } from '../../components';
 import AuthContext from '../../context/Auth';
 import toast from 'react-hot-toast';
 
@@ -11,8 +11,8 @@ export default function Events() {
   const [load, setLoad] = useState(false);
   const [pageLoad, setPageLoad] = useState(true);
   const [events, setEvent] = useState([]);
-
-  const { token } = useContext(AuthContext);
+  const [openDetails, setOpenDetails] = useState(false);
+  const { token, userId } = useContext(AuthContext);
 
   const [value, setValue] = useState({
     title: '',
@@ -20,6 +20,8 @@ export default function Events() {
     date: '',
     description: ''
   });
+
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
     fetchEvents();
@@ -100,10 +102,6 @@ export default function Events() {
               description
               date
               price
-              creator {
-                _id
-                email
-              }
             }
           }
         `
@@ -126,12 +124,34 @@ export default function Events() {
         return res.json();
       })
       .then(resData => {
+        setEvent(old => {
+          const updatedEvents = [...old];
+          updatedEvents.push({
+            _id: resData.data.createEvent._id,
+            title: resData.data.createEvent.title,
+            description: resData.data.createEvent.description,
+            date: resData.data.createEvent.date,
+            price: resData.data.createEvent.price,
+            creator: {
+              _id: userId
+            }
+          });
+          return updatedEvents;
+        });
         setLoad(false);
-        fetchEvents();
+        setOpen(false);
       })
       .catch(err => {
         console.log(err);
       });
+  };
+
+  const setViewDetail = eventId => {
+    const selected = events.find(e => e._id === eventId);
+    setSelectedEvent({
+      ...selected
+    });
+    setOpenDetails(true);
   };
 
   return (
@@ -148,23 +168,7 @@ export default function Events() {
         {pageLoad ? (
           <Spinner style={{ height: '50rem' }} />
         ) : (
-          <>
-            {events.map((val, ind) => {
-              return (
-                <p
-                  key={ind}
-                  style={{
-                    fontSize: '2rem',
-                    padding: '2rem',
-                    margin: '1rem',
-                    border: '3px solid #000'
-                  }}
-                >
-                  {val.title}
-                </p>
-              );
-            })}
-          </>
+          <EventList events={events} authUserId={userId} onViewDetail={setViewDetail} />
         )}
       </div>
       <Modal
@@ -207,6 +211,27 @@ export default function Events() {
           </div>
         </form>
       </Modal>
+      {selectedEvent !== null && (
+        <Modal
+          setIsOpen={setOpenDetails}
+          isOpen={openDetails}
+          CloseIcon
+          title={'Details'}
+          style={{ height: 'auto', width: 'auto' }}
+        >
+          <h1 style={{ fontSize: '3rem' }}>{selectedEvent.title}</h1>
+          <h2 style={{ fontSize: '2rem' }}>
+            ${selectedEvent.price} - {new Date(selectedEvent.date).toLocaleDateString()}
+          </h2>
+          <p style={{ fontSize: '1.5rem' }}>{selectedEvent.description}</p>
+          <div className={classes.form_action} style={{ marginTop: '2.5rem' }}>
+            <button type='button' onClick={() => setOpenDetails(false)}>
+              Cancel
+            </button>
+            <button type='button'>Book {load && <Loader />}</button>
+          </div>
+        </Modal>
+      )}
     </section>
   );
 }

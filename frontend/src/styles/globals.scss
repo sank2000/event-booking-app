@@ -53,3 +53,18 @@ a {
     border-radius: 5px;
   }
 }
+
+.btn {
+  background-color: $color-primary-main;
+  font-family: inherit;
+  font-size: 1.5rem;
+  border: none;
+  color: #fff;
+  padding: 1rem 1.5rem;
+  transition: all 0.5s;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba($color-primary-main, 0.8);
+  }
+}
