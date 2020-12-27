@@ -1,4 +1,5 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
+import { gql, useQuery } from '@apollo/client';
 
 import classes from './style.module.scss';
 
@@ -6,14 +7,30 @@ import { Modal, Loader, Spinner, EventList } from '../../components';
 import AuthContext from '../../context/Auth';
 import toast from 'react-hot-toast';
 
+const GET_EVENTS = gql`
+  query {
+    events {
+      _id
+      title
+      description
+      date
+      price
+      creator {
+        _id
+        email
+      }
+    }
+  }
+`;
+
 export default function Events() {
   const [open, setOpen] = useState(false);
   const [load, setLoad] = useState(false);
   const [bookingLoad, setBookingLoad] = useState(false);
-  const [pageLoad, setPageLoad] = useState(true);
-  const [events, setEvent] = useState([]);
   const [openDetails, setOpenDetails] = useState(false);
   const { token, userId } = useContext(AuthContext);
+
+  const { loading, error, data } = useQuery(GET_EVENTS);
 
   const [value, setValue] = useState({
     title: '',
@@ -24,10 +41,6 @@ export default function Events() {
 
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
   const handleChange = e => {
     const { name, value } = e.target;
 
@@ -37,48 +50,9 @@ export default function Events() {
     }));
   };
 
-  const fetchEvents = () => {
-    const requestBody = {
-      query: `
-          query {
-            events {
-              _id
-              title
-              description
-              date
-              price
-              creator {
-                _id
-                email
-              }
-            }
-          }
-        `
-    };
-
-    fetch('/graphql', {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          toast.error('This is an error!');
-          throw new Error('Failed!');
-        }
-        return res.json();
-      })
-      .then(resData => {
-        const events = resData.data.events;
-        setEvent(events);
-        setPageLoad(false);
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  };
+  if (error) {
+    toast.error(error);
+  }
 
   const handleSubmit = e => {
     e.preventDefault();
@@ -122,20 +96,20 @@ export default function Events() {
         return res.json();
       })
       .then(resData => {
-        setEvent(old => {
-          const updatedEvents = [...old];
-          updatedEvents.push({
-            _id: resData.data.createEvent._id,
-            title: resData.data.createEvent.title,
-            description: resData.data.createEvent.description,
-            date: resData.data.createEvent.date,
-            price: resData.data.createEvent.price,
-            creator: {
-              _id: userId
-            }
-          });
-          return updatedEvents;
-        });
+        // setEvent(old => {
+        //   const updatedEvents = [...old];
+        //   updatedEvents.push({
+        //     _id: resData.data.createEvent._id,
+        //     title: resData.data.createEvent.title,
+        //     description: resData.data.createEvent.description,
+        //     date: resData.data.createEvent.date,
+        //     price: resData.data.createEvent.price,
+        //     creator: {
+        //       _id: userId
+        //     }
+        //   });
+        //   return updatedEvents;
+        // });
         setLoad(false);
         setOpen(false);
       })
@@ -187,7 +161,7 @@ export default function Events() {
   };
 
   const setViewDetail = eventId => {
-    const selected = events.find(e => e._id === eventId);
+    const selected = data.events.find(e => e._id === eventId);
     setSelectedEvent({
       ...selected
     });
@@ -205,10 +179,10 @@ export default function Events() {
         </div>
       )}
       <div>
-        {pageLoad ? (
+        {loading ? (
           <Spinner style={{ height: '50rem' }} />
         ) : (
-          <EventList events={events} authUserId={userId} onViewDetail={setViewDetail} />
+          <EventList events={data.events} authUserId={userId} onViewDetail={setViewDetail} />
         )}
       </div>
       <Modal
