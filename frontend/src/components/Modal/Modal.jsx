@@ -32,7 +32,7 @@ export default function Modal({
         !isOpen
           ? { zIndex: -10, opacity: 0, transform: 'translateY("100%")' }
           : {
-              zIndex: 9999,
+              zIndex: 8888,
               opacity: 1,
               transform: 'translateY("0")'
             }

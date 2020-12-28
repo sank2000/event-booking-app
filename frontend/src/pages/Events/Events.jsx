@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { gql, useQuery } from '@apollo/client';
+import React, { useState, useContext, useEffect } from 'react';
+import { gql, useQuery, useMutation } from '@apollo/client';
 
 import classes from './style.module.scss';
 
@@ -23,14 +23,40 @@ const GET_EVENTS = gql`
   }
 `;
 
+const CREATE_EVENTS = gql`
+  mutation CreateEvent($title: String!, $description: String!, $price: Float!, $date: String!) {
+    createEvent(eventInput: { title: $title, description: $description, price: $price, date: $date }) {
+      _id
+      title
+      description
+      date
+      price
+    }
+  }
+`;
+
+const BOOK_EVENTS = gql`
+  mutation BookEvent($eventId: ID!) {
+    bookEvent(eventId: $eventId) {
+      _id
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 export default function Events() {
   const [open, setOpen] = useState(false);
   const [load, setLoad] = useState(false);
   const [bookingLoad, setBookingLoad] = useState(false);
   const [openDetails, setOpenDetails] = useState(false);
+  const [events, setEvents] = useState([]);
   const { token, userId } = useContext(AuthContext);
 
   const { loading, error, data } = useQuery(GET_EVENTS);
+
+  const [createEvent] = useMutation(CREATE_EVENTS);
+  const [bookEvent] = useMutation(BOOK_EVENTS);
 
   const [value, setValue] = useState({
     title: '',
@@ -40,6 +66,13 @@ export default function Events() {
   });
 
   const [selectedEvent, setSelectedEvent] = useState(null);
+
+  useEffect(() => {
+    if (loading === false) {
+      setEvents(data.events);
+    }
+    //eslint-disable-next-line
+  }, [loading]);
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -65,51 +98,29 @@ export default function Events() {
 
     setLoad(true);
 
-    const requestBody = {
-      query: `
-          mutation {
-            createEvent(eventInput: {title: "${title}", description: "${description}", price: ${price}, date: "${date}"}) {
-              _id
-              title
-              description
-              date
-              price
-            }
-          }
-        `
-    };
-
-    fetch('/graphql', {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + token
+    createEvent({
+      variables: {
+        title,
+        price: Number(price),
+        date,
+        description
       }
     })
-      .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          toast.error('This is an error!');
-          setLoad(false);
-          throw new Error('Failed!');
-        }
-        return res.json();
-      })
       .then(resData => {
-        // setEvent(old => {
-        //   const updatedEvents = [...old];
-        //   updatedEvents.push({
-        //     _id: resData.data.createEvent._id,
-        //     title: resData.data.createEvent.title,
-        //     description: resData.data.createEvent.description,
-        //     date: resData.data.createEvent.date,
-        //     price: resData.data.createEvent.price,
-        //     creator: {
-        //       _id: userId
-        //     }
-        //   });
-        //   return updatedEvents;
-        // });
+        setEvents(old => {
+          const updatedEvents = [...old];
+          updatedEvents.push({
+            _id: resData.data.createEvent._id,
+            title: resData.data.createEvent.title,
+            description: resData.data.createEvent.description,
+            date: resData.data.createEvent.date,
+            price: resData.data.createEvent.price,
+            creator: {
+              _id: userId
+            }
+          });
+          return updatedEvents;
+        });
         setLoad(false);
         setOpen(false);
       })
@@ -124,33 +135,12 @@ export default function Events() {
       return;
     }
     setBookingLoad(true);
-    const requestBody = {
-      query: `
-          mutation {
-            bookEvent(eventId: "${selectedEvent._id}") {
-              _id
-             createdAt
-             updatedAt
-            }
-          }
-        `
-    };
 
-    fetch('/graphql', {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + token
+    bookEvent({
+      variables: {
+        eventId: selectedEvent._id
       }
     })
-      .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          toast.error('This is an error!');
-          throw new Error('Failed!');
-        }
-        return res.json();
-      })
       .then(resData => {
         toast.success('Booked Successfully !!!');
         setOpenDetails(false);
@@ -161,7 +151,7 @@ export default function Events() {
   };
 
   const setViewDetail = eventId => {
-    const selected = data.events.find(e => e._id === eventId);
+    const selected = events.find(e => e._id === eventId);
     setSelectedEvent({
       ...selected
     });
@@ -182,7 +172,7 @@ export default function Events() {
         {loading ? (
           <Spinner style={{ height: '50rem' }} />
         ) : (
-          <EventList events={data.events} authUserId={userId} onViewDetail={setViewDetail} />
+          <EventList events={events} authUserId={userId} onViewDetail={setViewDetail} />
         )}
       </div>
       <Modal
