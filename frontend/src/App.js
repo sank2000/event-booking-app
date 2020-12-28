@@ -18,6 +18,7 @@ const link = onError(({ graphQLErrors, networkError }) => {
     graphQLErrors.map(({ message, locations, path }) => {
       if (message === 'Unauthenticated!') {
         localStorage.removeItem('event_token');
+        localStorage.removeItem('event_userId');
         toast.error('unauthorized');
         setTimeout(() => {
           window.location.reload();
@@ -55,12 +56,13 @@ const client = new ApolloClient({
 function App() {
   const [auth, setAuth] = useState({
     token: localStorage.getItem('event_token'),
-    userId: null
+    userId: localStorage.getItem('event_userId')
   });
 
   useEffect(() => {
     if (auth.token !== localStorage.getItem('event_token')) {
       localStorage.setItem('event_token', auth.token);
+      localStorage.setItem('event_userId', auth.userId);
     }
   }, [auth]);
 

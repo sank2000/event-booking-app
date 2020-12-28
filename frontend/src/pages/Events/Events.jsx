@@ -52,7 +52,6 @@ export default function Events() {
   const [openDetails, setOpenDetails] = useState(false);
   const [events, setEvents] = useState([]);
   const { token, userId } = useContext(AuthContext);
-
   const { loading, error, data } = useQuery(GET_EVENTS);
 
   const [createEvent] = useMutation(CREATE_EVENTS);
