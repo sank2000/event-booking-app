@@ -1,89 +1,57 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+
+import { gql, useQuery, useMutation } from '@apollo/client';
 
 import { Spinner, BookingList } from '../../components';
-import AuthContext from '../../context/Auth';
 import toast from 'react-hot-toast';
 
+const GET_BOOKINGS = gql`
+  query {
+    bookings {
+      _id
+      createdAt
+      event {
+        _id
+        title
+        date
+      }
+    }
+  }
+`;
+
+const CANCEL_BOOKING = gql`
+  mutation cancelBooking($bookingId: ID!) {
+    cancelBooking(bookingId: $bookingId) {
+      _id
+      title
+    }
+  }
+`;
+
 export default function Booking() {
-  const [pageLoad, setPageLoad] = useState(true);
   const [bookings, setBooking] = useState([]);
 
-  const { token } = useContext(AuthContext);
+  const { loading, error, data } = useQuery(GET_BOOKINGS);
+  const [cancelBooking] = useMutation(CANCEL_BOOKING);
 
   useEffect(() => {
-    fetchBookings();
+    if (loading === false) {
+      setBooking(data.bookings);
+    }
     //eslint-disable-next-line
-  }, []);
+  }, [loading]);
 
-  const fetchBookings = () => {
-    const requestBody = {
-      query: `
-          query {
-            bookings {
-              _id
-             createdAt
-             event {
-               _id
-               title
-               date
-             }
-            }
-          }
-        `
-    };
-
-    fetch('/graphql', {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + token
-      }
-    })
-      .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error('Failed!');
-        }
-        return res.json();
-      })
-      .then(resData => {
-        const bookings = resData.data.bookings;
-        setBooking(bookings);
-        setPageLoad(false);
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  };
+  if (error) {
+    toast.error(error);
+  }
 
   const deleteBookingHandler = (bookingId, setLoad) => {
     setLoad(true);
-    const requestBody = {
-      query: `
-          mutation {
-            cancelBooking(bookingId: "${bookingId}") {
-            _id
-             title
-            }
-          }
-        `
-    };
-
-    fetch('/graphql', {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + token
+    cancelBooking({
+      variables: {
+        bookingId
       }
     })
-      .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          toast.error('This is an error!');
-          throw new Error('Failed!');
-        }
-        return res.json();
-      })
       .then(resData => {
         setBooking(prevState => {
           const updatedBookings = prevState.filter(booking => booking._id !== bookingId);
@@ -98,7 +66,7 @@ export default function Booking() {
 
   return (
     <section className='page'>
-      {pageLoad ? (
+      {loading ? (
         <Spinner style={{ height: '40rem' }} />
       ) : (
         <BookingList bookings={bookings} onDelete={deleteBookingHandler} />
