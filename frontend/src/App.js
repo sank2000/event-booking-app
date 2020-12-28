@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Route, Redirect, Switch } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { ApolloClient, InMemoryCache, createHttpLink, ApolloProvider } from '@apollo/client';
@@ -59,18 +59,15 @@ function App() {
     userId: localStorage.getItem('event_userId')
   });
 
-  useEffect(() => {
-    if (auth.token !== localStorage.getItem('event_token')) {
-      localStorage.setItem('event_token', auth.token);
-      localStorage.setItem('event_userId', auth.userId);
-    }
-  }, [auth]);
-
   const login = (token, userId, tokenExpiration) => {
+    localStorage.setItem('event_token', token);
+    localStorage.setItem('event_userId', userId);
     setAuth({ token: token, userId: userId });
   };
 
   const logout = () => {
+    localStorage.removeItem('event_token');
+    localStorage.removeItem('event_userId');
     setAuth({ token: null, userId: null });
   };
 
