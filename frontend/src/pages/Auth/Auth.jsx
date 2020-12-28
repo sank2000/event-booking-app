@@ -1,15 +1,52 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import { gql, useLazyQuery, useMutation } from '@apollo/client';
 import classes from './style.module.scss';
 import toast from 'react-hot-toast';
 
 import AuthContext from '../../context/Auth';
 import { Loader } from '../../components';
 
+const LOGIN = gql`
+  query Login($email: String!, $password: String!) {
+    login(email: $email, password: $password) {
+      userId
+      token
+      tokenExpiration
+    }
+  }
+`;
+
+const CREATE_USER = gql`
+  mutation CreateUser($email: String!, $password: String!) {
+    createUser(userInput: { email: $email, password: $password }) {
+      _id
+      email
+    }
+  }
+`;
+
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [load, setLoad] = useState(false);
 
-  const { login } = useContext(AuthContext);
+  const [login, { loading, data, error }] = useLazyQuery(LOGIN);
+  const [createUser] = useMutation(CREATE_USER);
+
+  const { login: loginContext } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (loading === false && data && data.login) {
+      loginContext(data.login.token, data.login.userId, data.login.tokenExpiration);
+    }
+    //eslint-disable-next-line
+  }, [loading]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error('Invalid email or password');
+    }
+    //eslint-disable-next-line
+  }, [error]);
 
   const [value, setValue] = useState({
     email: '',
@@ -38,68 +75,30 @@ export default function Auth() {
       return;
     }
 
-    setLoad(true);
-
-    let requestBody = {
-      query: `
-        query Login($email: String!, $password: String!) {
-          login(email: $email, password: $password) {
-            userId
-            token
-            tokenExpiration
-          }
-        }
-      `,
-      variables: {
-        email: email,
-        password: password
-      }
-    };
-
-    if (!isLogin) {
-      requestBody = {
-        query: `
-          mutation CreateUser($email: String!, $password: String!) {
-            createUser(userInput: {email: $email, password: $password}) {
-              _id
-              email
-            }
-          }
-        `,
+    if (isLogin) {
+      login({
         variables: {
           email: email,
           password: password
         }
-      };
-    }
-
-    fetch('/graphql', {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          toast.error('This is an error!');
-          setLoad(false);
-          throw new Error('Failed!');
+      });
+    } else {
+      setLoad(true);
+      createUser({
+        variables: {
+          email: email,
+          password: password
         }
-        return res.json();
       })
-      .then(resData => {
-        setLoad(false);
-        if (resData.data.login && resData.data.login.token) {
-          login(resData.data.login.token, resData.data.login.userId, resData.data.login.tokenExpiration);
-        } else {
+        .then(resData => {
+          setLoad(false);
           toast.success('Account Created Successfully');
           setIsLogin(true);
-        }
-      })
-      .catch(err => {
-        console.log(err);
-      });
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
   };
 
   return (
@@ -125,7 +124,7 @@ export default function Auth() {
           />
         </div>
         <div className={classes.form_action}>
-          <button type='submit'>Submit {load && <Loader />}</button>
+          <button type='submit'>Submit {(load || loading) && <Loader />}</button>
           <button type='button' onClick={switchModeHandler}>
             Switch to {isLogin ? 'Signup' : 'Login'}
           </button>
